@@ -1,3 +1,8 @@
+output "instance_type_used" {
+  description = "Instance type used for the EC2 instances"
+  value       = local.instance_type
+}
+
 output "server_1_public_ip" {
   description = "Public IP address of server-1"
   value       = aws_instance.server_1.public_ip

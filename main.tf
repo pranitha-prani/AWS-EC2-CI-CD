@@ -41,6 +41,24 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+# Data source to get available free-tier eligible instance types
+data "aws_ec2_instance_types" "free_tier" {
+  filter {
+    name   = "free-tier-eligible"
+    values = ["true"]
+  }
+
+  filter {
+    name   = "current-generation"
+    values = ["true"]
+  }
+}
+
+# Local value to select first available free-tier instance type
+locals {
+  instance_type = length(data.aws_ec2_instance_types.free_tier.instance_types) > 0 ? data.aws_ec2_instance_types.free_tier.instance_types[0] : var.instance_type
+}
+
 # Security Group - Allow all TCP ports from anywhere
 resource "aws_security_group" "allow_all_tcp" {
   name        = "allow-all-tcp-from-internet"
@@ -71,7 +89,7 @@ resource "aws_security_group" "allow_all_tcp" {
 # EC2 Instance - server-1
 resource "aws_instance" "server_1" {
   ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
+  instance_type          = local.instance_type
   subnet_id              = data.aws_subnets.public.ids[0]
   vpc_security_group_ids = [aws_security_group.allow_all_tcp.id]
 
@@ -83,7 +101,7 @@ resource "aws_instance" "server_1" {
 # EC2 Instance - server-2
 resource "aws_instance" "server_2" {
   ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
+  instance_type          = local.instance_type
   subnet_id              = data.aws_subnets.public.ids[0]
   vpc_security_group_ids = [aws_security_group.allow_all_tcp.id]
 
@@ -95,7 +113,7 @@ resource "aws_instance" "server_2" {
 # EC2 Instance - server-3
 resource "aws_instance" "server_3" {
   ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
+  instance_type          = local.instance_type
   subnet_id              = data.aws_subnets.public.ids[0]
   vpc_security_group_ids = [aws_security_group.allow_all_tcp.id]
 
