@@ -37,8 +37,3 @@ output "server_3_private_ip" {
   description = "Private IP address of server-3"
   value       = aws_instance.server_3.private_ip
 }
-
-output "security_group_id" {
-  description = "ID of the default security group used"
-  value       = data.aws_security_group.default.id
-}
