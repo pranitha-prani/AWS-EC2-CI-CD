@@ -3,6 +3,11 @@ output "instance_type_used" {
   value       = local.instance_type
 }
 
+output "security_group_id" {
+  description = "ID of the default security group used"
+  value       = data.aws_security_group.default.id
+}
+
 output "server_1_public_ip" {
   description = "Public IP address of server-1"
   value       = aws_instance.server_1.public_ip
@@ -34,6 +39,6 @@ output "server_3_private_ip" {
 }
 
 output "security_group_id" {
-  description = "ID of the security group"
-  value       = aws_security_group.allow_all_tcp.id
+  description = "ID of the default security group used"
+  value       = data.aws_security_group.default.id
 }

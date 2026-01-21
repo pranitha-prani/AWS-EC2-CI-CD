@@ -17,6 +17,12 @@ data "aws_vpc" "default" {
   default = true
 }
 
+# Data source to get default security group
+data "aws_security_group" "default" {
+  vpc_id = data.aws_vpc.default.id
+  name   = "default"
+}
+
 # Data source to get public subnets in default VPC
 data "aws_subnets" "public" {
   filter {
@@ -59,39 +65,12 @@ locals {
   instance_type = length(data.aws_ec2_instance_types.free_tier.instance_types) > 0 ? data.aws_ec2_instance_types.free_tier.instance_types[0] : var.instance_type
 }
 
-# Security Group - Allow all TCP ports from anywhere
-resource "aws_security_group" "allow_all_tcp" {
-  name        = "allow-all-tcp-from-internet"
-  description = "Allow all TCP inbound traffic from internet"
-  vpc_id      = data.aws_vpc.default.id
-
-  ingress {
-    description = "All TCP from anywhere"
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "allow-all-tcp-sg"
-  }
-}
-
 # EC2 Instance - server-1
 resource "aws_instance" "server_1" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = local.instance_type
   subnet_id              = data.aws_subnets.public.ids[0]
-  vpc_security_group_ids = [aws_security_group.allow_all_tcp.id]
+  vpc_security_group_ids = [data.aws_security_group.default.id]
 
   tags = {
     Name = "server-1"
@@ -103,7 +82,7 @@ resource "aws_instance" "server_2" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = local.instance_type
   subnet_id              = data.aws_subnets.public.ids[0]
-  vpc_security_group_ids = [aws_security_group.allow_all_tcp.id]
+  vpc_security_group_ids = [data.aws_security_group.default.id]
 
   tags = {
     Name = "server-2"
@@ -115,7 +94,7 @@ resource "aws_instance" "server_3" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = local.instance_type
   subnet_id              = data.aws_subnets.public.ids[0]
-  vpc_security_group_ids = [aws_security_group.allow_all_tcp.id]
+  vpc_security_group_ids = [data.aws_security_group.default.id]
 
   tags = {
     Name = "server-3"
